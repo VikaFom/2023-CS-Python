@@ -1,42 +1,48 @@
-from operator import add, mul, sub, truediv
-from typing import List, Optional, Union
-
-ops = {"+": add, "-": sub, "*": mul, "/": truediv}
-
-
-def _split_if_string(string_or_list: Union[List[str], str]) -> List[str]:
-    return string_or_list.split() if isinstance(string_or_list, str) else string_or_list
+from operator import add, mul, sub
+from operator import truediv as div
+from typing import List
 
 
-def prefix_evaluate(prefix_equation: Union[List[str], str]) -> Optional[int]:
-    if not prefix_equation:
-        return None
-    prefix_equation = _split_if_string(prefix_equation)
-    value_stack = []
-    while prefix_equation:
-        el = prefix_equation.pop()
-        if el not in ops:
-            value_stack.append(int(el))
+def prefix_evaluate(prefix_evaluation: List[str]) -> int:
+    ops = {"+": add, "-": sub, "*": mul, "/": div}
+    queue = prefix_evaluation
+    stack = []
+    for i in queue:
+        if i in ["+", "-", "*", "/"]:
+            a = int(stack.pop())
+            b = int(stack.pop())
+            stack.append(ops[i](b, a))
         else:
-            r_val = value_stack.pop()
-            l_val = value_stack.pop()
-            operation = ops[el]
-            value_stack.append(operation(r_val, l_val))
-
-    return value_stack[0]
+            stack.append(i)
+    return stack[-1]
 
 
-def to_prefix(equation: str) -> str:
-    op_stack = []
-    prefix = []
-
-    for el in equation.split()[::-1]:
-        pass
-
-    while op_stack:
-        prefix.append(op_stack.pop())
-
-    return " ".join(prefix[::-1])
+def to_prefix(equation: str) -> List[str]:
+    stack = []
+    queue = []
+    equation = equation.split()
+    priority = {"+": 0, "-": 0, "*": 1, "/": 1}
+    for i in equation:
+        if i in ["+", "-", "*", "/"]:
+            if len(stack) == 0 or stack[-1] =='(':
+                stack.append(i)
+            elif priority[i] > priority[stack[-1]]:
+                stack.append(i)
+            else:
+                while len(stack) > 0 and stack[-1] != '(' and priority[i] <= priority[stack[-1]]:
+                    queue.append(stack.pop())
+                stack.append(i)
+        elif i == "(":
+            stack.append(i)
+        elif i == ")":
+            while stack[-1] != "(":
+                queue.append(stack.pop())
+            stack.pop() 
+        else:
+            queue.append(int(i))
+    while  len(stack) > 0:
+        queue.append(stack.pop())
+    return queue
 
 
 def calculate(equation: str) -> int:
