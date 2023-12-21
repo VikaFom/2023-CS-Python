@@ -1,14 +1,28 @@
 from ocean import Ocean
 
+def read_state_from_file(path):
+    file = open(path)
+    n_rows, n_clms = (int(i) for i in file.readline().split())
+    init_state = []
+    for i in range(n_rows):
+        line = [int(i) for i in file.readline().split()]
+        init_state.append(line)
+    return init_state
+
 
 def test_ocean_init():
-    Ocean
-    assert False
+    init_state = read_state_from_file('testinput.txt')
+    ocean = Ocean(init_state=init_state)
+    assert init_state == ocean.state
 
 
 def test_ocean_repr():
-    assert False
+    ocean = Ocean(read_state_from_file('testinput.txt'))
+    assert eval(repr(ocean))
 
 
 def test_ocean_step():
-    assert False
+    ocean1 = Ocean(read_state_from_file('testinput.txt'))
+    ocean2 = Ocean(read_state_from_file('step1result.txt'))
+    ocean3 = ocean1.gen_next_quantum()
+    assert ocean3 == ocean2
